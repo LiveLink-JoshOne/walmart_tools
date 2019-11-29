@@ -2,9 +2,31 @@
 ## Run as
 ## $ missing_images /path/to/urls_array.json
 
+app_root = File.expand_path(dirname(File.dirname(__FILE__)))
+
+require 'optparse'
 require 'json'
-require File.join(File.dirname(File.dirname(__FILE__)), 'lib', 'missing_images.rb')
+require File.join(app_root, 'lib', 'missing_images.rb')
 
-urls = JSON.parse(File.read(ARGV[0]))
+options = Hash.new
 
-check_img_urls(urls)
+optparse = OptionParser.new do |opts|
+  opts.banner = "Usage: bin/missing_images /path/to/image_urls.json"
+
+  opts.on( '-f', '--file FILEPATH', 'Specify filepath of JSON array') { |path| option[:urls] = JSON.parse(File.read(path)) }
+  opts.on( '-?', '--help', 'Prints this help prompt') { puts opts ; exit }
+  opts.on( '-b', '--pry', 'Invoke pry to run in Ruby CLI - Run > check_img_urls(urls_array)') { options[:pry] = true }
+end.parse!
+
+begin
+  if options[:pry]
+    require 'pry'
+    binding.pry
+    raise EndPry
+  else
+    abort('[WMTOOLS][ERR] Specify a filepath to JSON array of URLS with -f') unless options[:urls]
+    check_img_urls(options[:urls])
+  end
+rescue EndPry
+  puts('[WMTOOLS][LOG] Hope you enjoyed!')
+end
