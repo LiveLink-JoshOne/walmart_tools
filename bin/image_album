@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+## Interact with customer albums, check for missing images and download manually
+
+## Get ICE to provide a list / JSON array of URLs in the customer album, or generate yourself using instructions at bottom of linked page:
+## https://sites.google.com/a/livelinktechnology.net/intranet/wiki/shared-documentation/knowledge-base/baggage/baggage-troubleshooting/missing-images-in-photo-albums
+
+app_root = File.expand_path(dirname(File.dirname(__FILE__)))
+
+require 'optparse'
+require File.join(app_root, 'lib', 'image_album.rb')
+
+options = {
+  :temp_dir = File.join(app_root, 'tmp', 'image_album', Date.today.to_s),
+  :output_dir = File.join(app_root, 'output', 'image_album'),
+  :output_file = "album_#{Date.today.to_s}.zip"
+}
+
+optparse = OptionParser.new do |opts|
+  opts.banner = 'Usage: bin/image_album -f /path/to/img_urls.json [options]'
+
+  opts.on( '-C', '--check-images', 'Check number of missing images') { options[:check] = true }
+  opts.on( '-D', '--download-images', 'Download images to local ZIP file (specify with -o)') { options[:download] = true }
+
+  opts.on( '-f', '--file FILEPATH', 'Specify filepath of JSON array') { |path| options[:urls] = JSON.parse(File.read(path)) }
+  opts.on( '-o', '--output FILEPATH.zip', 'Specify filepath of output (album zip)') do |path|
+    options[:output_file] = [path.split('/').last.gsub('.zip', ''), 'zip'].join('.')
+    options[:output_dir] = File.join(path.split('/')[0..-2])
+  end
+  opts.on( '-t', '--tempdir DIRPATH', 'Specify path of temp dir') { |path| options[:temp_dir] = path }
+
+  opts.on( '-?', '--help', 'Prints this help prompt') { puts opts ; exit }
+  opts.on( '-b', '--pry', 'Invoke pry to run in Ruby CLI - Run > check_img_urls(urls_array)') { options[:pry] = true }
+end.parse!
+
+begin
+  options.each { |k,v| FileUtils.mkdir_p(dir) if k.to_s.include?('dir') }
+  if options[:pry]
+    require 'pry'
+    binding.pry
+    raise EndPry
+  end
+  bernard = WMAlbum.new(options)
+  if options[:download]
+    bernard.download_img_urls(options[:check])
+  elsif options[:check]
+    bernard.check_img_urls
+  else
+    puts('[WMTOOLS][IMAGEALBUM][ERR] No function chosen! Please specify -C or -D (run -? for help)')
+  end
+  puts('[WMTOOLS][IMAGEALBUM][LOG] ImageAlbum job completed! May your wingspan flourish for all time')
+rescue EndPry
+  puts('[WMTOOLS][LOG] See you again soon!')
+end
+
