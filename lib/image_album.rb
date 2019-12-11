@@ -14,14 +14,14 @@ class WMAlbum
   def initialize(options = Hash.new)
     app_root = File.expand_path(File.dirname(File.dirname(__FILE__)))
     @options = options
-    @options.each { |k,v| FileUtils.mkdir_p(dir) if k.to_s.include?('dir') }
+    @options.each { |k,v| FileUtils.mkdir_p(v) if k.to_s.include?('dir') }
     @zipfile = File.join(@options[:output_dir], @options[:output_file])
     abort('[WMTOOLS][IMAGEALBUM][ERR] Specify a filepath to JSON array of URLS with -f') unless @options[:urls]
   end
 
   def check_img(url)
     puts("[WMTOOLS][IMAGEALBUM][LOG] Checking #{url}")
-    `curl -I "#{url}"` =~ /404 [Nn]ot [Ff]ound/ ? return false : return true
+    `curl -I "#{url}"` =~ /404 [Nn]ot [Ff]ound/ ? false : true
   end
 
   def download_img(url)

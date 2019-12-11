@@ -5,15 +5,16 @@
 ## Get ICE to provide a list / JSON array of URLs in the customer album, or generate yourself using instructions at bottom of linked page:
 ## https://sites.google.com/a/livelinktechnology.net/intranet/wiki/shared-documentation/knowledge-base/baggage/baggage-troubleshooting/missing-images-in-photo-albums
 
-app_root = File.expand_path(dirname(File.dirname(__FILE__)))
+app_root = File.expand_path(File.dirname(File.dirname(__FILE__)))
 
 require 'optparse'
+require 'pry'
 require File.join(app_root, 'lib', 'image_album.rb')
 
 options = {
-  :temp_dir = File.join(app_root, 'tmp', 'image_album', Date.today.to_s),
-  :output_dir = File.join(app_root, 'output', 'image_album'),
-  :output_file = "album_#{Date.today.to_s}.zip"
+  :temp_dir => File.join(app_root, 'tmp', 'image_album', Date.today.to_s),
+  :output_dir => File.join(app_root, 'output', 'image_album'),
+  :output_file => "album_#{Date.today.to_s}.zip"
 }
 
 optparse = OptionParser.new do |opts|
@@ -34,13 +35,9 @@ optparse = OptionParser.new do |opts|
 end.parse!
 
 begin
-  options.each { |k,v| FileUtils.mkdir_p(dir) if k.to_s.include?('dir') }
-  if options[:pry]
-    require 'pry'
-    binding.pry
-    raise EndPry
-  end
   bernard = WMAlbum.new(options)
+  binding.pry if options[:pry]
+
   if options[:download]
     bernard.download_img_urls(options[:check])
   elsif options[:check]
@@ -48,8 +45,7 @@ begin
   else
     puts('[WMTOOLS][IMAGEALBUM][ERR] No function chosen! Please specify -C or -D (run -? for help)')
   end
+
   puts('[WMTOOLS][IMAGEALBUM][LOG] ImageAlbum job completed! May your wingspan flourish for all time')
-rescue EndPry
-  puts('[WMTOOLS][LOG] See you again soon!')
 end
 
