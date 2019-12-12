@@ -1,4 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'mechanize'
 gem 'json'
+gem 'fileutils'
+gem 'pry'
+#gem 'nokogiri'
