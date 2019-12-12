@@ -1,6 +1,12 @@
 # walmart_tools
 Tools for Walmart Photo Technical Support - any suggestions welcome!
 
+## Installation
+Should only require a "$ bundle install" in order to install dependencies
+Make sure you have bundler installed:
+  $ sudo apt install ruby-bundler
+  $ gem install bundler
+
 ## image_album
 Check and download images in an album manually
 Instructions on how to create the JSON array of URLs is in the help text of the tool, also below:
@@ -27,3 +33,11 @@ Usage:
 
 - Check album images and download the available ones to a specific file location
     $ ruby bin/image_album -C -D -f tmp/something.json -o /home/horatio/something.zip
+
+## shopcomp_automation
+STILL VERY MUCH A WIP
+Nokogiri dependencies
++ make
++ gcc
++ g++
++ many many others
