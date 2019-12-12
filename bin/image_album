@@ -23,14 +23,34 @@ optparse = OptionParser.new do |opts|
   opts.on( '-C', '--check-images', 'Check number of missing images') { options[:check] = true }
   opts.on( '-D', '--download-images', 'Download images to local ZIP file (specify with -o)') { options[:download] = true }
 
-  opts.on( '-f', '--file FILEPATH', 'Specify filepath of JSON array') { |path| options[:urls] = JSON.parse(File.read(path)) }
-  opts.on( '-o', '--output FILEPATH.zip', 'Specify filepath of output (album zip)') do |path|
-    options[:output_file] = [path.split('/').last.gsub('.zip', ''), 'zip'].join('.')
-    options[:output_dir] = File.join(path.split('/')[0..-2])
+  opts.on( '-f', '--file FILEPATH', 'Specify filepath of JSON array') { |srcpath| options[:urls] = JSON.parse(File.read(srcpath)) }
+  opts.on( '-o', '--output FILEPATH.zip', 'Specify filepath of output (album zip)') do |outpath|
+    outpath = File.join(app_root, outpath) unless outpath[0] == '/'
+    options[:output_file] = [outpath.split('/').last.gsub('.zip', ''), 'zip'].join('.')
+    options[:output_dir] = File.join(outpath.split('/')[0..-2])
   end
-  opts.on( '-t', '--tempdir DIRPATH', 'Specify path of temp dir') { |path| options[:temp_dir] = path }
 
-  opts.on( '-?', '--help', 'Prints this help prompt') { puts opts ; exit }
+  opts.on( '-t', '--tempdir DIRPATH', 'Specify path of temp dir') { |tmppath| options[:temp_dir] = tmppath }
+  opts.on( '-?', '--help', 'Prints this help prompt') do
+    puts('')
+    puts('[HELP] !!! PREPARATION STEPS !!!')
+    puts('1) Please navigate to the album page in Site Management, open the console and run:')
+    puts('')
+    puts("x = document.getElementsByClassName('photos')[0];")
+    puts('y = [];')
+    puts('for (var i = 0; i < x.children.length; i++) {')
+    puts('    y.push(x.children[i].src)')
+    puts('};')
+    puts('copy(y)')
+    puts('')
+    puts('2) This will copy an array of URLs to your clipboard - paste this into a .json file.')
+    puts('3) Run this tool with -f followed by the filepath of the .json, and other required args:')
+    puts('')
+    puts(opts)
+    puts('')
+    puts('[HELP] Please view the README for more information')
+    exit
+  end
   opts.on( '-b', '--pry', 'Invoke pry to run in Ruby CLI - Run > check_img_urls(urls_array)') { options[:pry] = true }
 end.parse!
 
@@ -43,9 +63,10 @@ begin
   elsif options[:check]
     bernard.check_img_urls
   else
-    puts('[WMTOOLS][IMAGEALBUM][ERR] No function chosen! Please specify -C or -D (run -? for help)')
+    puts('[WMTOOLS][IMGALBUM][ERR] No function chosen! Please specify -C or -D (run -? for help)')
   end
 
-  puts('[WMTOOLS][IMAGEALBUM][LOG] ImageAlbum job completed! May your wingspan flourish for all time')
+  puts('')
+  puts('[WMTOOLS][IMGALBUM][LOG] ImageAlbum job completed! May your wingspan flourish for all time')
 end
 
